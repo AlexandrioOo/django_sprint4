@@ -7,13 +7,7 @@ from django.db import models
 
 
 class BaseModel(models.Model):
-    """
-    Абстрактная модель для добавления общих полей.
-
-    Поля:
-    - is_published: Отвечает за публикацию объекта.
-    - created_at: Автоматически добавляет время создания объекта.
-    """
+    """Абстрактная модель для добавления общих полей."""
 
     is_published = models.BooleanField(
         default=True,
@@ -26,7 +20,10 @@ class BaseModel(models.Model):
     )
 
     class Meta:
+        """Meta-класс для BaseModel.
+
+        Указывает, что эта модель является абстрактной
+        и не должна создавать таблицу в базе данных.
         """
-        Meta-класс для BaseModel.
-        """
+
         abstract = True

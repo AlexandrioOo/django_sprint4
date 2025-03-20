@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from .models import Category, Location, Post
+
 
 # Отображение пустых значений в админе.
 admin.site.empty_value_display = 'Не задано'
@@ -16,6 +18,7 @@ class PostInline(admin.TabularInline):
     extra = 0
 
 
+@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     """Класс администрирования для модели Category."""
 
@@ -24,6 +27,7 @@ class CategoryAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     """Класс администрирования для модели Location."""
 
@@ -32,6 +36,7 @@ class LocationAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     """Класс администрирования для модели Post."""
 
@@ -43,20 +48,14 @@ class PostAdmin(admin.ModelAdmin):
         'location',
         'category',
         'is_published',
-        'created_at'
+        'created_at',
     )
     list_editable = (
         'author',
         'location',
         'category',
-        'is_published'
+        'is_published',
     )
     search_fields = ('title',)
     list_filter = ('is_published',)
     list_display_links = ('title',)
-
-
-# Регистрация моделей в админе.
-admin.site.register(Post, PostAdmin)
-admin.site.register(Category, CategoryAdmin)
-admin.site.register(Location, LocationAdmin)

@@ -5,23 +5,28 @@
 """
 
 from core.models import BaseModel
+
 from django.db import models
 from django.contrib.auth import get_user_model
 
 # Получение модели пользователя
 User = get_user_model()
 
+# Константы
+MAX_TITLE_LENGTH = 256
+TEXT_PREVIEW_LENGTH = 50
+IMAGE_UPLOAD_PATH = 'blogs_images'
+
 
 class Category(BaseModel):
-    """
-    Модель для категорий постов.
+    """Модель для категорий постов.
 
     Категории используются для группировки публикаций
     по тематическим разделам.
     """
 
     title = models.CharField(
-        max_length=256,
+        max_length=MAX_TITLE_LENGTH,
         verbose_name='Заголовок',
     )
     description = models.TextField(
@@ -35,11 +40,15 @@ class Category(BaseModel):
             'разрешены символы латиницы, цифры, дефис и подчёркивание.'
         ),
     )
+    is_visible = models.BooleanField(
+        default=True,
+        verbose_name='Видимость',
+        help_text='Определяет, будет ли категория отображаться.',
+    )
 
     class Meta:
-        """
-        Meta-класс для модели Category.
-        """
+        """Meta-класс для модели Category."""
+
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
@@ -48,22 +57,20 @@ class Category(BaseModel):
 
 
 class Location(BaseModel):
-    """
-    Модель для местоположений.
+    """Модель для местоположений.
 
     Местоположения используются для указания географической привязки
     публикаций.
     """
 
     name = models.CharField(
-        max_length=256,
+        max_length=MAX_TITLE_LENGTH,
         verbose_name='Название места',
     )
 
     class Meta:
-        """
-        Meta-класс для модели Location.
-        """
+        """Meta-класс для модели Location."""
+
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
 
@@ -72,8 +79,7 @@ class Location(BaseModel):
 
 
 class Post(BaseModel):
-    """
-    Модель для публикаций.
+    """Модель для публикаций.
 
     Публикации представляют собой записи, создаваемые пользователями.
     Каждая публикация имеет заголовок, текст, автора, категорию,
@@ -81,7 +87,7 @@ class Post(BaseModel):
     """
 
     title = models.CharField(
-        max_length=256,
+        max_length=MAX_TITLE_LENGTH,
         verbose_name='Заголовок',
     )
     text = models.TextField(
@@ -97,6 +103,7 @@ class Post(BaseModel):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        related_name='posts',
         verbose_name='Автор публикации',
     )
     location = models.ForeignKey(
@@ -104,36 +111,35 @@ class Post(BaseModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        related_name='posts',
         verbose_name='Местоположение',
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
+        related_name='posts',
         verbose_name='Категория',
     )
     image = models.ImageField(
-        upload_to='blogs_images',
+        upload_to=IMAGE_UPLOAD_PATH,
         null=True,
         blank=True,
         verbose_name='Фото',
     )
 
     class Meta:
-        """
-        Meta-класс для модели Post.
-        """
+        """Meta-класс для модели Post."""
+
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
-        default_related_name = 'posts'
 
     def __str__(self):
         return str(self.title)
 
 
 class Comment(models.Model):
-    """
-    Модель для комментариев к публикациям.
+    """Модель для комментариев к публикациям.
 
     Комментарии позволяют пользователям оставлять отзывы к публикациям.
     Содержат автора, текст и дату создания.
@@ -143,6 +149,7 @@ class Comment(models.Model):
         User,
         on_delete=models.CASCADE,
         null=True,
+        related_name='comments',
         verbose_name='Автор комментария',
     )
     post = models.ForeignKey(
@@ -161,11 +168,10 @@ class Comment(models.Model):
     )
 
     class Meta:
-        """
-        Meta-класс для модели Comment.
-        """
+        """Meta-класс для модели Comment."""
+
         verbose_name = 'комментарий'
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return str(self.text)
+        return str(self.text)[:TEXT_PREVIEW_LENGTH] if self.text else ""
